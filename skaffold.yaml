@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/shaojie-li/sample-go-jenkin:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/shaojie-li/sample-go-jenkin:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: sample-go-jenkin
+        chartPath: charts/sample-go-jenkin
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/shaojie-li/sample-go-jenkin'
+          image.tag: '{{.DIGEST_HEX}}'
